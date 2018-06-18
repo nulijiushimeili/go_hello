@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+	"runtime"
+	"math"
+)
 
 // +-*/ 的计算
 func eval(a,b int, op string) int{
@@ -46,6 +51,30 @@ func div2(a,b int)(x,y int){
 	return
 }
 
+// go也是函数式编程语言,它的函数式一等公民
+// 函数可以作为参数传递,函数里面也可以再写别的函数
+func apply(op func(int,int) int, a, b int)int{
+	p := reflect.ValueOf(op).Pointer()
+	opName := runtime.FuncForPC(p).Name()
+	fmt.Printf(
+		"Calling function %s with args " +
+			"(%d, %d): ",opName,a,b,
+		)
+	return op(a,b)
+}
+
+func pow(a,b int)int{
+	return int(math.Pow(float64(a),float64(b)))
+}
+
+func sum(nums... int)int{
+	s := 0
+	for i := range nums{
+		s += nums[i]
+	}
+	return s
+}
+
 /*
 函数多个返回值时,可以起名字
 对于调用者没有区别
@@ -61,4 +90,18 @@ func main(){
 	}else{
 		fmt.Println(result)
 	}
+
+
+	res1 := apply(pow,4,5)
+	fmt.Println(res1)
+
+	// 匿名函数
+	fmt.Println(apply(
+		func(a,b int)int{
+			return int(math.Pow(float64(a),float64(b)))
+		},3,4,
+	))
+
+	// 无限制参数
+	fmt.Println(sum(1,2,3,4,5))
 }
